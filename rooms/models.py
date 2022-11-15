@@ -69,6 +69,8 @@ class Room(CommonModel):
 
     def rating(self):
         ratings = [review["rating"] for review in self.reviews.all().values("rating")]
+        if not ratings:
+            return 0
         return round(sum(ratings) / len(ratings), 2)
 
 

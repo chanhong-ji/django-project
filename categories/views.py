@@ -7,6 +7,8 @@ from rest_framework.status import HTTP_204_NO_CONTENT
 
 
 class Categories(APIView):
+    serializer_class = CategorySerializer
+
     def get_object(self):
         return Category.objects.all()
 
