@@ -3,6 +3,7 @@ from rooms.views import (
     Amenities,
     AmenityDetail,
     RoomDetail,
+    RoomPhotos,
     RoomReviews,
     Rooms,
 )
@@ -16,4 +17,5 @@ urlpatterns_rooms = [
     path("", Rooms.as_view()),
     path("<int:pk>", RoomDetail.as_view()),
     path("<int:pk>/reviews", RoomReviews.as_view()),
+    path("<int:pk>/photos", RoomPhotos.as_view()),
 ]

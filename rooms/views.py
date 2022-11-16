@@ -1,4 +1,5 @@
 from categories.models import Category
+from medias.serializers import PhotoSerializer
 from reviews.serializers import ReviewSerializer
 from rooms.models import Room, Amenity
 from rooms.serializers import (
@@ -219,3 +220,27 @@ class RoomReviews(APIView):
         serializer = ReviewSerializer(reviews, many=True)
 
         return Response(serializer.data)
+
+
+class RoomPhotos(APIView):
+    def get_object(self, pk):
+        try:
+            return Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            raise NotFound
+
+    def post(self, request, pk):
+        if not request.user.is_authenticated:
+            raise NotAuthenticated
+
+        room = self.get_object(pk=pk)
+        if room.owner != request.user:
+            raise PermissionDenied
+
+        serializer = PhotoSerializer(data=request.data)
+        if serializer.is_valid():
+            photo = serializer.save(room=room)
+            serializer = PhotoSerializer(photo)
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
