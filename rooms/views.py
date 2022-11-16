@@ -10,7 +10,6 @@ from rooms.serializers import (
 from rest_framework.views import APIView
 from rest_framework.exceptions import (
     NotFound,
-    NotAuthenticated,
     ParseError,
     PermissionDenied,
 )
@@ -195,6 +194,10 @@ class RoomDetail(APIView, RoomCommon):
 
 
 class RoomReviews(APIView):
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = ReviewSerializer
+
     def get_object(self, pk):
         try:
             return Room.objects.get(pk=pk)
@@ -204,7 +207,7 @@ class RoomReviews(APIView):
     def get(self, request, pk):
         room = self.get_object(pk=pk)
         try:
-            request.query_params.get("page", 1)
+            page = request.query_params.get("page", 1)
             page = int(page)
         except ValueError:
             page = 1
@@ -216,6 +219,18 @@ class RoomReviews(APIView):
         serializer = ReviewSerializer(reviews, many=True)
 
         return Response(serializer.data)
+
+    def post(self, request, pk):
+        room = self.get_object(pk=pk)
+        if room.owner == request.user:
+            raise PermissionDenied("Owner can't rate")
+
+        serializer = ReviewSerializer(data=request.data)
+        if serializer.is_valid():
+            review = serializer.save(user=request.user, room=room)
+            return Response(ReviewSerializer(review).data)
+        else:
+            return Response(serializer.errors)
 
 
 class RoomPhotos(APIView):
