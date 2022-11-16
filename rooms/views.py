@@ -1,7 +1,5 @@
-from multiprocessing import context
-from sqlite3 import IntegrityError
-import categories
 from categories.models import Category
+from reviews.serializers import ReviewSerializer
 from rooms.models import Room, Amenity
 from rooms.serializers import (
     AmenitySerializer,
@@ -17,6 +15,7 @@ from rest_framework.exceptions import (
 )
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
+from django.conf import settings
 
 
 class Amenities(APIView):
@@ -196,3 +195,27 @@ class RoomDetail(APIView, RoomCommon):
 
         room.delete()
         return Response(status=HTTP_204_NO_CONTENT)
+
+
+class RoomReviews(APIView):
+    def get_object(self, pk):
+        try:
+            return Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            raise NotFound
+
+    def get(self, request, pk):
+        room = self.get_object(pk=pk)
+        try:
+            request.query_params.get("page", 1)
+            page = int(page)
+        except ValueError:
+            page = 1
+
+        page = int(page)
+        start = (page - 1) * settings.PAGE_SIZE
+        end = start + settings.PAGE_SIZE
+        reviews = room.reviews.all()[start:end]
+        serializer = ReviewSerializer(reviews, many=True)
+
+        return Response(serializer.data)
