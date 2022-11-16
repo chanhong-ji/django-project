@@ -6,6 +6,7 @@ from categories.urls import urlpatterns__categories
 from rooms.urls import urlpatterns_amenities, urlpatterns_rooms
 from experiences.urls import urlpatterns_perk
 from medias.urls import url_patterns as urlpatterns__medias
+from wishlists.urls import urlpatterns as urlpatterns__wishlists
 
 
 urlpatterns = [
@@ -15,6 +16,7 @@ urlpatterns = [
     path("perks/", include(urlpatterns_perk)),
     path("rooms/", include(urlpatterns_rooms)),
     path("medias/", include(urlpatterns__medias)),
+    path("wishlists/", include(urlpatterns__wishlists)),
 ] + static(
     settings.MEDIA_URL,
     document_root=settings.MEDIA_ROOT,
