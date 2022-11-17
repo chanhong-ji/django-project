@@ -2,6 +2,7 @@ from django.urls import path
 from rooms.views import (
     Amenities,
     AmenityDetail,
+    RoomBookings,
     RoomDetail,
     RoomPhotos,
     RoomReviews,
@@ -18,4 +19,5 @@ urlpatterns_rooms = [
     path("<int:pk>", RoomDetail.as_view()),
     path("<int:pk>/reviews", RoomReviews.as_view()),
     path("<int:pk>/photos", RoomPhotos.as_view()),
+    path("<int:pk>/bookings", RoomBookings.as_view()),
 ]
