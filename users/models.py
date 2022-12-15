@@ -15,6 +15,9 @@ class User(AbstractUser):
         WON = ("won", "Korean won")
         USD = ("usd", "Dollar")
 
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
     first_name = models.CharField(
         max_length=150,
         editable=False,
@@ -23,11 +26,15 @@ class User(AbstractUser):
         max_length=150,
         editable=False,
     )
+    email = models.EmailField(
+        max_length=300,
+        unique=True,
+    )
     name = models.CharField(
         max_length=150,
         null=True,
     )
-    avatar = models.ImageField(
+    avatar = models.URLField(
         blank=True,
     )
     is_host = models.BooleanField(

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from categories.serializers import CategorySerializer
 from medias.serializers import PhotoSerializer
 from rooms.models import Amenity, Room
-from users.serializers import TinyUserSerializer
+from users.serializers import PublicUserSerializer
 from wishlists.models import Wishlist
 
 
@@ -53,7 +53,7 @@ class RoomListSerializer(serializers.ModelSerializer):
 
 class RoomDetailSerializer(serializers.ModelSerializer):
 
-    owner = TinyUserSerializer(read_only=True)
+    owner = PublicUserSerializer(read_only=True)
     amenities = AmenitySerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
     photos = PhotoSerializer(read_only=True, many=True)
