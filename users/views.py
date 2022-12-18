@@ -102,7 +102,7 @@ class Login(APIView):
         if serializer.is_valid():
             user = authenticate(
                 request,
-                email=serializer.data.get("email"),
+                username=serializer.data.get("username"),
                 password=serializer.data.get("password"),
             )
             if user:

@@ -280,10 +280,11 @@ class RoomBookings(APIView):
         serializer = PublicBookingSerializer(bookings, many=True)
         return Response(serializer.data)
 
-    def put(self, request, pk):
+    def post(self, request, pk):
         room = self.get_room(pk)
         serializer = CreateRoomBookingSerializer(
             data=request.data,
+            context={"room": room},
         )
         if serializer.is_valid():
             room = serializer.save(
