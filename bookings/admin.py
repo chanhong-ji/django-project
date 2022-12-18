@@ -5,13 +5,13 @@ from bookings.models import Booking
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     list_display = (
-        "kind",
-        "user",
+        "pk",
+        "__str__",
         "room",
         "experience",
         "check_in",
         "check_out",
-        "experience_time",
+        "experience_date",
         "guests",
     )
     list_filter = ("kind",)

@@ -15,9 +15,6 @@ class User(AbstractUser):
         WON = ("won", "Korean won")
         USD = ("usd", "Dollar")
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
-
     first_name = models.CharField(
         max_length=150,
         editable=False,

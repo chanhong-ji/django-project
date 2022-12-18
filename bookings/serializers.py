@@ -1,5 +1,7 @@
 from django.utils import timezone
 from rest_framework import serializers
+
+from users.serializers import PublicUserSerializer
 from .models import Booking
 
 
@@ -7,10 +9,40 @@ class PublicBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = (
+            "pk",
             "check_in",
             "check_out",
-            "experience_time",
+            "experience_date",
         )
+
+
+class PrivateBookingSerializer(serializers.ModelSerializer):
+    user = PublicUserSerializer(read_only=True)
+
+    class Meta:
+        model = Booking
+        exclude = ("created_at",)
+
+
+class CreateExperienceBookingSerializer(serializers.ModelSerializer):
+    experience_date = serializers.DateField(required=True)
+    guests = serializers.IntegerField(min_value=1, required=True)
+
+    class Meta:
+        model = Booking
+        fields = (
+            "experience_date",
+            "guests",
+        )
+
+    def validate_experience_date(self, value):
+        now = timezone.localdate(timezone.now())
+        if value < now:
+            raise serializers.ValidationError("Wrong input")
+        experience = self.context.get("experience")
+        if Booking.objects.filter(experience=experience, experience_date=value):
+            raise serializers.ValidationError("This experience is already taken")
+        return value
 
 
 class CreateRoomBookingSerializer(serializers.ModelSerializer):
@@ -47,7 +79,8 @@ class CreateRoomBookingSerializer(serializers.ModelSerializer):
             )
 
         if Booking.objects.filter(
-            check_in__lte=check_out,
+            room=self.context["room"],
+            check_in__lt=check_out,
             check_out__gt=check_in,
         ).exists():
             raise serializers.ValidationError(
