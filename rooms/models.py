@@ -58,20 +58,14 @@ class Room(CommonModel):
         on_delete=models.SET_NULL,
         related_name="rooms",
     )
-    check_in = models.TimeField(
-        blank=True,
-        null=True,
-    )
-    check_out = models.TimeField(
-        blank=True,
-        null=True,
-    )
+    check_in_time = models.TimeField()
+    check_out_time = models.TimeField()
 
     def rating(self):
         ratings = [review["rating"] for review in self.reviews.all().values("rating")]
         if not ratings:
-            return 0
-        return round(sum(ratings) / len(ratings), 2)
+            return 0, 0
+        return round(sum(ratings) / len(ratings), 2), len(ratings)
 
 
 class Amenity(CommonModel):

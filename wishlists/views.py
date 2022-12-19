@@ -1,3 +1,4 @@
+from experiences.models import Experience
 from rooms.models import Room
 from .models import Wishlist
 from wishlists.serializers import WishlistSerializer
@@ -18,9 +19,6 @@ class Wishlists(APIView):
         serializer = WishlistSerializer(
             wishlists,
             many=True,
-            context={
-                "request": request,
-            },
         )
         return Response(serializer.data)
 
@@ -33,17 +31,18 @@ class Wishlists(APIView):
             return Response(serializer.errors)
 
 
-class WishlistDetail(APIView):
+class WishlistCommon(APIView):
 
     permission_classes = [IsAuthenticated]
-    serializer_class = WishlistSerializer
 
     def get_object(self, pk, user):
         try:
             return Wishlist.objects.get(pk=pk, user=user)
         except Wishlist.DoesNotExist:
-            return NotFound
+            raise NotFound("Wishlist not found")
 
+
+class WishlistDetail(WishlistCommon):
     def get(self, request, pk):
         wishlist = self.get_object(pk, request.user)
         serializer = WishlistSerializer(
@@ -74,16 +73,8 @@ class WishlistDetail(APIView):
         return Response(status=HTTP_200_OK)
 
 
-class WishlistToggle(APIView):
-
-    permission_classes = [IsAuthenticated]
-
-    def get_wishlist(self, pk, user):
-        try:
-            return Wishlist.objects.get(pk=pk, user=user)
-        except Wishlist.DoesNotExist:
-            raise NotFound("Wishlist not found")
-
+# wishlists/:pk/rooms/:room_pk
+class WishlistRoomToggle(WishlistCommon):
     def get_room(self, pk):
         try:
             return Room.objects.get(pk=pk)
@@ -92,10 +83,29 @@ class WishlistToggle(APIView):
 
     def put(self, request, pk, room_pk):
         room = self.get_room(room_pk)
-        wishlist = self.get_wishlist(pk, request.user)
+        wishlist = self.get_object(pk, request.user)
         if wishlist.rooms.filter(pk=room_pk).exists():
             wishlist.rooms.remove(room)
         else:
             wishlist.rooms.add(room)
+
+        return Response(status=HTTP_200_OK)
+
+
+# wishlists/:pk/experiences/:experience_pk
+class WishlistExperienceToggle(WishlistCommon):
+    def get_experience(self, pk):
+        try:
+            return Experience.objects.get(pk=pk)
+        except Experience.DoesNotExist:
+            raise NotFound
+
+    def put(self, request, pk, experience_pk):
+        experience = self.get_experience(experience_pk)
+        wishlists = self.get_object(pk, request.user)
+        if wishlists.experiences.filter(pk=experience_pk).exists():
+            wishlists.experiences.remove(experience)
+        else:
+            wishlists.experiences.add(experience)
 
         return Response(status=HTTP_200_OK)

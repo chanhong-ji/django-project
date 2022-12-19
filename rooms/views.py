@@ -37,6 +37,8 @@ class Amenities(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        if not (request.user.is_superuser or request.user.is_staff):
+            raise PermissionDenied
         serializer = AmenitySerializer(data=request.data)
         if serializer.is_valid():
             new_amenity = serializer.save()
@@ -61,6 +63,9 @@ class AmenityDetail(APIView):
         return Response(serializer.data)
 
     def post(self, request, pk):
+        if not (request.user.is_superuser or request.user.is_staff):
+            raise PermissionDenied
+
         serializer = AmenitySerializer(
             instance=self.get_object(pk=pk),
             data=request.data,
@@ -92,21 +97,19 @@ class RoomCommon:
 
     def amenities_validate(self, request):
         amenities_valid = []
-        amenities = request.data.get("amenities")
+        amenities = request.data.get("amenities", [])
         for amenity_pk in amenities:
             try:
                 amenity = Amenity.objects.get(pk=amenity_pk)
+                amenities_valid.append(amenity)
             except Amenity.DoesNotExist:
-                # if amenity does not exist
                 pass
 
-            amenities_valid.append(amenity)
         return amenities_valid
 
 
 class Rooms(APIView, RoomCommon):
 
-    serializer_class = RoomDetailSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_object(self, pk):
@@ -138,6 +141,7 @@ class Rooms(APIView, RoomCommon):
             for amenity in amenities:
                 room.amenities.add(amenity)
 
+            room.save()
             serializer = RoomDetailSerializer(room)
             return Response(serializer.data)
         else:
@@ -236,6 +240,7 @@ class RoomReviews(APIView):
             return Response(serializer.errors)
 
 
+# rooms/:pk/photos
 class RoomPhotos(APIView):
 
     permission_classes = [IsAuthenticatedOrReadOnly]

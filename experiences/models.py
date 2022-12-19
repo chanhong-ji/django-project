@@ -29,8 +29,15 @@ class Experience(CommonModel):
     address = models.CharField(
         max_length=300,
     )
+    # start = ArrayField(
+    #     models.TimeField(
+    #         blank=True,
+    #         null=True,
+    #     ),
+    #     size=5,
+    # )
     start = models.TimeField()
-    end = models.TimeField()
+    duration = models.DurationField()
     perks = models.ManyToManyField(
         "experiences.Perk",
     )
@@ -40,6 +47,12 @@ class Experience(CommonModel):
         blank=True,
         on_delete=models.SET_NULL,
     )
+
+    def rating(self):
+        ratings = [review["rating"] for review in self.reviews.all().values("rating")]
+        if not ratings:
+            return 0, 0
+        return round(sum(ratings) / len(ratings), 2), len(ratings)
 
 
 class Perk(CommonModel):

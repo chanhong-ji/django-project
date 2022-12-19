@@ -36,7 +36,8 @@ class RoomListSerializer(serializers.ModelSerializer):
         )
 
     def get_rating(self, room):
-        return room.rating()
+        raiting, count = room.rating()
+        return f"{raiting}({count})"
 
     def get_is_owner(self, room):
         if "request" not in self.context:
@@ -65,7 +66,8 @@ class RoomDetailSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_rating(self, room):
-        return room.rating()
+        raiting, count = room.rating()
+        return f"{raiting}({count})"
 
     def get_is_owner(self, room):
         if "request" not in self.context:

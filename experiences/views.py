@@ -10,8 +10,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 import rest_framework.status as status
-from rest_framework.permissions import IsAuthenticated
-from experiences.serializers import ExperienceSerializer, PerkSerializer
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from experiences.serializers import (
+    ExperienceDetailSerializer,
+    ExperienceListSerializer,
+    PerkSerializer,
+)
+from django.conf import settings
+from medias.serializers import PhotoSerializer, VideoSerializer
+from reviews.serializers import ReviewSerializer
 
 
 class ValidationExperience:
@@ -48,9 +55,16 @@ class CommonExperience(APIView):
 # experiences/
 # GET POST
 class Experiences(APIView, ValidationExperience):
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get(self, request):
         experiences = Experience.objects.all()
-        serializer = ExperienceSerializer(experiences, many=True)
+        serializer = ExperienceListSerializer(
+            experiences,
+            many=True,
+            context={"user": request.user},
+        )
         return Response(serializer.data)
 
     def post(self, request):
@@ -58,7 +72,7 @@ class Experiences(APIView, ValidationExperience):
         if not user:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-        serializer = ExperienceSerializer(data=request.data)
+        serializer = ExperienceDetailSerializer(data=request.data)
         if serializer.is_valid():
             # validate category
             category = self.validate_category(request)
@@ -71,19 +85,27 @@ class Experiences(APIView, ValidationExperience):
             for perk in perks:
                 experience.perks.add(perk)
 
-            serializer = ExperienceSerializer(experience)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer = ExperienceDetailSerializer(
+                experience, context={"user": request.user}
+            )
+            return Response(serializer.data)
 
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors)
 
 
 # experiences/:pk
 # GET PUT DELETE
 class ExperienceDetail(CommonExperience, ValidationExperience):
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get(self, request, pk):
         experience = self.get_object(pk=pk)
-        serializer = ExperienceSerializer(experience)
+        serializer = ExperienceDetailSerializer(
+            experience,
+            context={"user": request.user},
+        )
         return Response(serializer.data)
 
     def put(self, request, pk):
@@ -92,10 +114,11 @@ class ExperienceDetail(CommonExperience, ValidationExperience):
         if experience.host != request.user:
             raise PermissionDenied
 
-        serializer = ExperienceSerializer(
+        serializer = ExperienceDetailSerializer(
             instance=experience,
             data=request.data,
             partial=True,
+            context={"user": request.user},
         )
         if serializer.is_valid():
             if request.data.get("category"):
@@ -108,7 +131,10 @@ class ExperienceDetail(CommonExperience, ValidationExperience):
                     experience.perks.add(perk)
 
             updated = serializer.save()
-            serializer = ExperienceSerializer(updated)
+            serializer = ExperienceDetailSerializer(
+                updated,
+                context={"user": request.user},
+            )
             return Response(serializer.data)
         else:
             return Response(serializer.errors)
@@ -120,6 +146,43 @@ class ExperienceDetail(CommonExperience, ValidationExperience):
 
         experience.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# experiences/:pk/photos
+# POST
+class ExperiencePhotos(CommonExperience):
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def post(self, request, pk):
+        experience = self.get_object(pk)
+        if request.user != experience.host:
+            raise PermissionDenied
+
+        serializer = PhotoSerializer(data=request.data)
+        if serializer.is_valid():
+            photo = serializer.save(experience=experience)
+            serializer = PhotoSerializer(photo)
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
+
+
+# experiences/:pk/video
+# POST
+class ExperienceVideo(CommonExperience):
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def post(self, request, pk):
+        experience = self.get_object(pk)
+        serializer = VideoSerializer(data=request.data)
+        if serializer.is_valid():
+            video = serializer.save(experience=experience)  # 자동으로 onebyone 되는게 아닌가??
+            serializer = VideoSerializer(video)
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
 
 
 # experiences/:pk/perks
@@ -134,6 +197,9 @@ class ExperiencePerks(CommonExperience):
 # experiences/:pk/bookings
 # GET POST
 class ExperienceBookings(CommonExperience):
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get(self, request, pk):
         experience = self.get_object(pk=pk)
         bookings = experience.bookings.filter(
@@ -188,10 +254,45 @@ class ExperienceBookingDetail(CommonExperience):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# experiences/perks
-class Perks(APIView):
-    serializer_class = PerkSerializer
+# experiences/:pk/reviews?page=<int>
+# GET POST
+class ExperienceReviews(CommonExperience):
 
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request, pk):
+        experience = self.get_object(pk)
+        try:
+            page = request.query_params.get("page", 1)
+            page = int(page)
+        except:
+            page = 1
+        page = int(page)
+        start = (page - 1) * settings.PAGE_SIZE
+        end = start + settings.PAGE_SIZE
+        reviews = experience.reviews.all()[start:end]
+        serializer = ReviewSerializer(reviews, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, pk):
+        experience = self.get_object(pk)
+        if experience.host == request.user:
+            raise PermissionDenied("Owner can't remain reviews")
+        serializer = ReviewSerializer(data=request.data)
+
+        if serializer.is_valid():
+            review = serializer.save(
+                user=request.user,
+                experience=experience,
+            )
+            return Response(ReviewSerializer(review).data)
+        else:
+            return Response(serializer.errors)
+
+
+# experiences/perks
+# GET POST
+class Perks(APIView):
     def get_object(self):
         return Perk.objects.all()
 
@@ -200,6 +301,8 @@ class Perks(APIView):
         return Response(data=serializer.data)
 
     def post(self, request):
+        if not (request.user.is_superuser or request.user.is_staff):
+            raise PermissionDenied
         serializer = PerkSerializer(data=request.data)
         if serializer.is_valid():
             perk = serializer.save()
@@ -209,9 +312,8 @@ class Perks(APIView):
 
 
 # experiences/perks/:pk
+# GET PUT DELETE
 class PerkDetail(APIView):
-    serializer_class = Perk
-
     def get_object(self, pk):
         try:
             return Perk.objects.get(pk=pk)
@@ -219,12 +321,15 @@ class PerkDetail(APIView):
             raise NotFound
 
     def get(self, request, pk):
-        return Response(PerkSerializer(self.get_object(pk=pk)).data)
+        perk = self.get_object(pk)
+        return Response(PerkSerializer(perk).data)
 
     def put(self, request, pk):
+        if not (request.user.is_superuser or request.user.is_staff):
+            raise PermissionDenied
         perk = self.get_object(pk=pk)
         serializer = PerkSerializer(
-            instance=perk,
+            perk,
             data=request.data,
             partial=True,
         )
@@ -235,5 +340,8 @@ class PerkDetail(APIView):
             return Response(serializer.errors)
 
     def delete(self, request, pk):
+        if not (request.user.is_superuser or request.user.is_staff):
+            raise PermissionDenied
+
         self.get_object(pk=pk).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
