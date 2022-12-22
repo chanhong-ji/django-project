@@ -6,3 +6,8 @@
 - [x] ExperienceReviews
 - [x] ExperienceInWishlist
 - [x] Experiences
+
+## Test code
+
+- [x] TestAmenities
+- [x] TestAmenitiesDetail

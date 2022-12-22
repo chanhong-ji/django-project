@@ -18,7 +18,9 @@ from rest_framework.exceptions import (
     PermissionDenied,
 )
 from rest_framework.response import Response
-from rest_framework.status import HTTP_204_NO_CONTENT
+
+# from rest_framework.status import status.HTTP_204_NO_CONTENT
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 
@@ -44,6 +46,7 @@ class Amenities(APIView):
             new_amenity = serializer.save()
             return Response(
                 AmenitySerializer(new_amenity).data,
+                status=status.HTTP_201_CREATED,
             )
         else:
             return Response(serializer.errors)
@@ -62,7 +65,7 @@ class AmenityDetail(APIView):
         serializer = AmenitySerializer(self.get_object(pk=pk))
         return Response(serializer.data)
 
-    def post(self, request, pk):
+    def put(self, request, pk):
         if not (request.user.is_superuser or request.user.is_staff):
             raise PermissionDenied
 
@@ -78,8 +81,12 @@ class AmenityDetail(APIView):
             return Response(serializer.errors)
 
     def delete(self, request, pk):
+
+        if not (request.user.is_superuser or request.user.is_staff):
+            raise PermissionDenied
+
         self.get_object(pk=pk).delete()
-        return Response(status=HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RoomCommon:
@@ -197,7 +204,7 @@ class RoomDetail(APIView, RoomCommon):
             return PermissionDenied
 
         room.delete()
-        return Response(status=HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RoomReviews(APIView):

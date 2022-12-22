@@ -18,7 +18,7 @@ def required(key, default_value=None):
     return value
 
 
-varialbes = {
+variables = {
     "django": {
         "secret_key": required("SECRET_KEY"),
     }
