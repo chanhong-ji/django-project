@@ -21,5 +21,8 @@ def required(key, default_value=None):
 variables = {
     "django": {
         "secret_key": required("SECRET_KEY"),
-    }
+    },
+    "cors": {
+        "domain": "http://localhost:3000",
+    },
 }

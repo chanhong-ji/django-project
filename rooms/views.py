@@ -19,7 +19,6 @@ from rest_framework.exceptions import (
 )
 from rest_framework.response import Response
 
-# from rest_framework.status import status.HTTP_204_NO_CONTENT
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
@@ -118,12 +117,6 @@ class RoomCommon:
 class Rooms(APIView, RoomCommon):
 
     permission_classes = [IsAuthenticatedOrReadOnly]
-
-    def get_object(self, pk):
-        try:
-            return Room.objects.get(pk=pk)
-        except Room.DoesNotExist:
-            raise NotFound
 
     def get(self, request):
         rooms = Room.objects.all()

@@ -4,6 +4,7 @@ from medias.serializers import PhotoSerializer
 from rooms.models import Amenity, Room
 from users.serializers import PublicUserSerializer
 from wishlists.models import Wishlist
+from django.contrib.auth.models import AnonymousUser
 
 
 class AmenitySerializer(serializers.ModelSerializer):
@@ -46,7 +47,10 @@ class RoomListSerializer(serializers.ModelSerializer):
         return request.user == room.owner
 
     def get_is_liked(self, room):
-        if "request" not in self.context:
+        if (
+            "request" not in self.context
+            or self.context["request"].user == AnonymousUser()
+        ):
             return False
         request = self.context["request"]
         return Wishlist.objects.filter(user=request.user, rooms__pk=room.pk).exists()
