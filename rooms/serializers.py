@@ -22,6 +22,7 @@ class RoomListSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
+    thumb_photo = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Room
@@ -34,11 +35,12 @@ class RoomListSerializer(serializers.ModelSerializer):
             "rating",
             "is_owner",
             "is_liked",
+            "thumb_photo",
         )
 
     def get_rating(self, room):
-        raiting, count = room.rating()
-        return f"{raiting}({count})"
+        rating = room.rating()
+        return rating
 
     def get_is_owner(self, room):
         if "request" not in self.context:
@@ -49,11 +51,14 @@ class RoomListSerializer(serializers.ModelSerializer):
     def get_is_liked(self, room):
         if (
             "request" not in self.context
-            or self.context["request"].user == AnonymousUser()
+            or not self.context["request"].user.is_authenticated
         ):
             return False
         request = self.context["request"]
         return Wishlist.objects.filter(user=request.user, rooms__pk=room.pk).exists()
+
+    def get_thumb_photo(self, room):
+        return room.photos.filter(thumb=True).values()[0]["file"]
 
 
 class RoomDetailSerializer(serializers.ModelSerializer):
@@ -61,20 +66,24 @@ class RoomDetailSerializer(serializers.ModelSerializer):
     owner = PublicUserSerializer(read_only=True)
     amenities = AmenitySerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
-    photos = PhotoSerializer(read_only=True, many=True)
+    photos = PhotoSerializer(many=True)
     rating = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
+    thumb_photo = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Room
         fields = "__all__"
 
     def get_rating(self, room):
-        raiting, count = room.rating()
-        return f"{raiting}({count})"
+        rating = room.rating()
+        return rating
 
     def get_is_owner(self, room):
         if "request" not in self.context:
             return False
         request = self.context["request"]
         return request.user == room.owner
+
+    def get_thumb_photo(self, room):
+        return room.photos.filter(thumb=True).values()[0]["file"]

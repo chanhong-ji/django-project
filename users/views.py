@@ -97,9 +97,16 @@ class Login(APIView):
 
     serializer_class = UserSerializers.LoginSerializer
 
+    def get_object(self, username):
+        try:
+            return User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise NotFound({"message": "User Doesn't exist"})
+
     def post(self, request):
         serializer = UserSerializers.LoginSerializer(data=request.data)
         if serializer.is_valid():
+            self.get_object(request.data.get("username"))
             user = authenticate(
                 request,
                 username=serializer.data.get("username"),
@@ -110,7 +117,7 @@ class Login(APIView):
                 return Response({"message": "welcome"}, status=status.HTTP_200_OK)
             else:
                 return Response(
-                    {"message": "User not found"}, status=status.HTTP_404_NOT_FOUND
+                    {"message": "Password wrong"}, status=status.HTTP_404_NOT_FOUND
                 )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

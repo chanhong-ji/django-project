@@ -6,6 +6,8 @@ class Photo(CommonModel):
     file = models.URLField()
     description = models.CharField(
         max_length=140,
+        blank=True,
+        null=True,
     )
     room = models.ForeignKey(
         "rooms.Room",
@@ -21,9 +23,15 @@ class Photo(CommonModel):
         null=True,
         related_name="photos",
     )
+    thumb = models.BooleanField(
+        default=False,
+    )
 
     def __str__(self):
-        return "Photo File"
+        if self.room:
+            return f"Image for room: {self.room.pk}"
+        if self.experience:
+            return f"Image for experience: {self.experience.pk}"
 
 
 class Video(CommonModel):

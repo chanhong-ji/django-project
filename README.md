@@ -7,6 +7,10 @@
 - [x] ExperienceInWishlist
 - [x] Experiences
 
+- [] Rooms (post photos)
+- [x] Photo thumb
+- [x] Login error message
+
 ## Test code
 
 - [x] TestAmenities
