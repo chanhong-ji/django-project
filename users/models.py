@@ -15,6 +15,10 @@ class User(AbstractUser):
         WON = ("won", "Korean won")
         USD = ("usd", "Dollar")
 
+    class SocialChoices(models.TextChoices):
+        KA = ("kakao", "Kakao")
+        GH = ("github", "Github")
+
     first_name = models.CharField(
         max_length=150,
         editable=False,
@@ -49,4 +53,10 @@ class User(AbstractUser):
     currency = models.CharField(
         max_length=5,
         choices=CurrencyChoices.choices,
+    )
+    social = models.CharField(
+        max_length=6,
+        choices=SocialChoices.choices,
+        blank=True,
+        null=True,
     )

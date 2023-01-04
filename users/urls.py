@@ -1,5 +1,14 @@
 from django.urls import path
-from .views import ChangePassword, Login, Logout, Me, Users, UserDetail
+from .views import (
+    ChangePassword,
+    GithubLogin,
+    KakaoLogin,
+    Login,
+    Logout,
+    Me,
+    Users,
+    UserDetail,
+)
 
 urlpatterns = [
     # users/
@@ -14,4 +23,8 @@ urlpatterns = [
     path("login", Login.as_view()),
     # users/logout
     path("logout", Logout.as_view()),
+    # users/github
+    path("github", GithubLogin.as_view()),
+    # users/kakao
+    path("kakao", KakaoLogin.as_view()),
 ]
