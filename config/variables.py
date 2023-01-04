@@ -23,6 +23,15 @@ variables = {
         "secret_key": required("SECRET_KEY"),
     },
     "cors": {
-        "domain": "http://localhost:3000",
+        "domain": required("CORS_DOMAIN"),
+    },
+    "github": {
+        "client_id": required("GH_CLIENT"),
+        "client_secret": required("GH_SECRET"),
+    },
+    "kakao": {
+        "client_id": required("KA_CLIENT"),
+        "client_secret": required("KA_SECRET"),
+        "redirect_url": required("KAKAO_REDIRECT_URL"),
     },
 }
