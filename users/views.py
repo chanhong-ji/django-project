@@ -1,4 +1,3 @@
-import email
 from pprint import pprint
 from random import randint
 from rest_framework.views import APIView
@@ -27,11 +26,12 @@ class Users(APIView):
             user = serializer.save()
             user.set_password(request.data.get("password"))
             user.save()
+            login(request, user)
             serializer = UserSerializers.PrivateUserSerializer(user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         else:
-            return Response(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # users/me

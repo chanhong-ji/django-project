@@ -33,6 +33,7 @@ class User(AbstractUser):
     )
     name = models.CharField(
         max_length=150,
+        blank=True,
         null=True,
     )
     avatar = models.URLField(
@@ -45,14 +46,18 @@ class User(AbstractUser):
     gender = models.CharField(
         max_length=10,
         choices=GenderChoices.choices,
+        blank=True,
+        null=True,
     )
     language = models.CharField(
         max_length=2,
         choices=LanguageChoices.choices,
+        default=LanguageChoices.KR,
     )
     currency = models.CharField(
         max_length=5,
         choices=CurrencyChoices.choices,
+        default=CurrencyChoices.WON,
     )
     social = models.CharField(
         max_length=6,

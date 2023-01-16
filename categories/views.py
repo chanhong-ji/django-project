@@ -5,21 +5,47 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.status import HTTP_204_NO_CONTENT
 
-
-class Categories(APIView):
+# categories/room
+class CategoriesRoom(APIView):
     serializer_class = CategorySerializer
 
     def get_object(self):
-        return Category.objects.all()
+        return Category.objects.filter(kind=Category.CategoryKindChoices.ROOMS)
 
     def get(self, request):
         serializer = CategorySerializer(self.get_object(), many=True)
         return Response(serializer.data)
 
     def post(self, request):
+        if not request.user.is_staff:
+            raise PermissionError
         serializer = CategorySerializer(data=request.data)
         if serializer.is_valid():
-            new_category = serializer.save()
+            new_category = serializer.save(kind=Category.CategoryKindChoices.ROOMS)
+            return Response(CategorySerializer(new_category).data)
+        else:
+            return Response(status=404, data=serializer.errors)
+
+
+# categories/experience
+class CategoriesExperience(APIView):
+    serializer_class = CategorySerializer
+
+    def get_object(self):
+        return Category.objects.filter(kind=Category.CategoryKindChoices.EXPERIENCES)
+
+    def get(self, request):
+        serializer = CategorySerializer(self.get_object(), many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        if not request.user.is_staff:
+            raise PermissionError
+        serializer = CategorySerializer(data=request.data)
+        if serializer.is_valid():
+            new_category = serializer.save(
+                kind=Category.CategoryKindChoices.EXPERIENCES
+            )
             return Response(CategorySerializer(new_category).data)
         else:
             return Response(status=404, data=serializer.errors)

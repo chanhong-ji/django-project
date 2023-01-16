@@ -23,6 +23,7 @@ class PrivateUserSerializer(serializers.ModelSerializer):
             "gender",
             "language",
             "currency",
+            "is_host",
         )
 
 
@@ -32,10 +33,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
         min_length=10,
         style={"input_type": "password"},
     )
-    password_confirm = serializers.CharField(
-        max_length=20,
-        style={"input_type": "password"},
-    )
 
     class Meta:
         model = User
@@ -43,7 +40,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
             "username",
             "email",
             "password",
-            "password_confirm",
             "name",
             "avatar",
             "gender",
@@ -53,15 +49,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
             "last_name",
         )
 
-    def validate(self, data):
-        password = data["password"]
-        password_confirm = data["password_confirm"]
-        if password != password_confirm:
-            raise serializers.ValidationError("Password confirm Wrong")
-        data.pop("password")
-        data.pop("password_confirm")
-        return data
-
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(
@@ -70,9 +57,6 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(
         max_length=20,
         min_length=10,
-    )
-    new_password_confirm = serializers.CharField(
-        max_length=20,
     )
 
 
