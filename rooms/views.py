@@ -1,3 +1,5 @@
+from datetime import timedelta
+from django.utils.dateparse import parse_date
 from django.conf import settings
 from django.utils import timezone
 from bookings.models import Booking
@@ -164,6 +166,7 @@ class Rooms(APIView, RoomCommon):
             return Response(serializer.errors)
 
 
+# rooms/:int
 class RoomDetail(APIView, RoomCommon):
 
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -177,6 +180,30 @@ class RoomDetail(APIView, RoomCommon):
     def get(self, request, pk):
         room = self.get_object(pk=pk)
         serializer = RoomDetailSerializer(room, context={"request": request})
+
+        bookings = PublicBookingSerializer(room.bookings, many=True).data
+        booked = []
+        check_in_dates = []
+        for booking in bookings:
+            booking = dict(booking)
+            check_in = booking.get("check_in")
+            check_out = booking.get("check_out")
+
+            check_in = parse_date(check_in)
+            check_out = parse_date(check_out)
+            days = check_out - check_in
+
+            for i in range(days.days):
+                day = check_in + timedelta(days=i)
+                if i == 0:
+                    check_in_dates.append(day)
+                else:
+                    booked.append(day)
+
+        data = serializer.data
+        data["booked"] = booked
+        data["check_in_disable"] = check_in_dates
+        return Response(data)
 
     def put(self, request, pk):
         room = Room.objects.get(pk=pk)
@@ -280,6 +307,7 @@ class RoomPhotos(APIView):
             return Response(serializer.errors)
 
 
+# rooms/:int/bookings
 class RoomBookings(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = CreateRoomBookingSerializer
@@ -314,3 +342,24 @@ class RoomBookings(APIView):
             )
             return Response(PublicBookingSerializer(room).data)
         else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# rooms/:int/bookings/check
+class RoomBookingCheck(APIView):
+    def get_object(self, pk):
+        try:
+            return Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            raise NotFound
+
+    def get(self, request, pk):
+        room = self.get_object(pk=pk)
+        check_in = request.query_params.get("check_in")
+        check_out = request.query_params.get("check_out")
+        exist = Booking.objects.filter(
+            room=room,
+            check_out__gt=check_in,
+            check_in__lt=check_out,
+        ).exists()
+        return Response(True if not exist else False)
