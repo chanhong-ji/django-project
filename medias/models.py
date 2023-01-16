@@ -28,10 +28,13 @@ class Photo(CommonModel):
     )
 
     def __str__(self):
+
         if self.room:
             return f"Image for room: {self.room.pk}"
-        if self.experience:
+        elif self.experience:
             return f"Image for experience: {self.experience.pk}"
+        else:
+            return ""
 
 
 class Video(CommonModel):

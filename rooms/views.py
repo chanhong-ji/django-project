@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.utils import timezone
 from bookings.models import Booking
+from medias.models import Photo
 from rooms.models import Room, Amenity
 from categories.models import Category
 from bookings.serializers import CreateRoomBookingSerializer, PublicBookingSerializer
@@ -18,7 +19,6 @@ from rest_framework.exceptions import (
     PermissionDenied,
 )
 from rest_framework.response import Response
-
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
@@ -113,7 +113,20 @@ class RoomCommon:
 
         return amenities_valid
 
+    def photos_validate(self, request):
+        photos = request.data.get("photos", [])
+        photos_valid = []
+        for photo_pk in photos:
+            try:
+                photo = Photo.objects.get(pk=photo_pk)
+                photos_valid.append(photo)
+            except Photo.DoesNotExist:
+                pass
 
+        return photos_valid
+
+
+# rooms/
 class Rooms(APIView, RoomCommon):
 
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -133,10 +146,13 @@ class Rooms(APIView, RoomCommon):
         serializer = RoomDetailSerializer(data=request.data)
         if serializer.is_valid():
             category = self.category_validate(request)
+            photos = self.photos_validate(request)
             room = serializer.save(
                 owner=request.user,
                 category=category,
+                photos=photos,
             )
+
             amenities = self.amenities_validate(request)
             for amenity in amenities:
                 room.amenities.add(amenity)
@@ -161,7 +177,6 @@ class RoomDetail(APIView, RoomCommon):
     def get(self, request, pk):
         room = self.get_object(pk=pk)
         serializer = RoomDetailSerializer(room, context={"request": request})
-        return Response(serializer.data)
 
     def put(self, request, pk):
         room = Room.objects.get(pk=pk)
@@ -299,4 +314,3 @@ class RoomBookings(APIView):
             )
             return Response(PublicBookingSerializer(room).data)
         else:
-            return Response(serializer.errors)

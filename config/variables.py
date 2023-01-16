@@ -34,4 +34,8 @@ variables = {
         "client_secret": required("KA_SECRET"),
         "redirect_url": required("KAKAO_REDIRECT_URL"),
     },
+    "cf": {
+        "client_id": required("CF_ACCOUNT_ID"),
+        "client_token": required("CF_TOKEN"),
+    },
 }

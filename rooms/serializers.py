@@ -4,7 +4,6 @@ from medias.serializers import PhotoSerializer
 from rooms.models import Amenity, Room
 from users.serializers import PublicUserSerializer
 from wishlists.models import Wishlist
-from django.contrib.auth.models import AnonymousUser
 
 
 class AmenitySerializer(serializers.ModelSerializer):
@@ -58,7 +57,10 @@ class RoomListSerializer(serializers.ModelSerializer):
         return Wishlist.objects.filter(user=request.user, rooms__pk=room.pk).exists()
 
     def get_thumb_photo(self, room):
-        return room.photos.filter(thumb=True).values()[0]["file"]
+        thumb_photos = room.photos.filter(thumb=True).values()
+        if thumb_photos:
+            return thumb_photos[0]["file"]
+        return None
 
 
 class RoomDetailSerializer(serializers.ModelSerializer):
@@ -66,7 +68,7 @@ class RoomDetailSerializer(serializers.ModelSerializer):
     owner = PublicUserSerializer(read_only=True)
     amenities = AmenitySerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
-    photos = PhotoSerializer(many=True)
+    photos = PhotoSerializer(many=True, read_only=True)
     rating = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
     thumb_photo = serializers.SerializerMethodField(read_only=True)
@@ -86,4 +88,7 @@ class RoomDetailSerializer(serializers.ModelSerializer):
         return request.user == room.owner
 
     def get_thumb_photo(self, room):
-        return room.photos.filter(thumb=True).values()[0]["file"]
+        thumb_photos = room.photos.filter(thumb=True).values()
+        if thumb_photos:
+            return thumb_photos[0]["file"]
+        return None
