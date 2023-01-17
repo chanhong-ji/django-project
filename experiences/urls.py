@@ -1,6 +1,5 @@
 from django.urls import path
 from experiences.views import (
-    ExperienceBookingDetail,
     ExperienceBookings,
     ExperienceDetail,
     ExperiencePhotos,
@@ -24,8 +23,6 @@ urlpatterns = [
     path("<int:pk>/perks", ExperiencePerks.as_view()),
     # experiences/:pk/bookings
     path("<int:pk>/bookings", ExperienceBookings.as_view()),
-    # experiences/:pk/bookings/:pk
-    path("<int:pk>/bookings/<int:booking_pk>", ExperienceBookingDetail.as_view()),
     # experiences/:pk/reviews
     path("<int:pk>/reviews", ExperienceReviews.as_view()),
     # experiences/perks

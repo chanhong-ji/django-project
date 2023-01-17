@@ -221,37 +221,10 @@ class ExperienceBookings(CommonExperience):
                 kind=Booking.BookingKindChoices.EXPERIENCE,
                 experience=experience,
             )
-            serializer = PrivateBookingSerializer(booking)
+            serializer = PublicBookingSerializer(booking)
             return Response(serializer.data)
         else:
             return Response(serializer.errors)
-
-
-# experiences/:pk/bookings/:pk
-# GET DELETE
-class ExperienceBookingDetail(CommonExperience):
-
-    permission_classes = [IsAuthenticated]
-
-    def get_booking(self, pk):
-        try:
-            return Booking.objects.get(pk=pk)
-        except Booking.DoesNotExist:
-            raise NotFound
-
-    def get(self, request, pk, booking_pk):
-        booking = self.get_booking(booking_pk)
-        if request.user != booking.user:
-            raise PermissionDenied
-        serializer = PrivateBookingSerializer(booking)
-        return Response(serializer.data)
-
-    def delete(self, request, pk, booking_pk):
-        booking = self.get_booking(booking_pk)
-        if request.user != booking.user:
-            raise PermissionDenied
-        booking.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # experiences/:pk/reviews?page=<int>

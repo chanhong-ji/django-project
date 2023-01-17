@@ -1,5 +1,9 @@
 from django.utils import timezone
 from rest_framework import serializers
+from experiences.serializers import ExperienceListSerializer
+from medias.models import Photo
+from medias.serializers import PhotoSerializer
+from rooms.serializers import RoomListSerializer
 
 from users.serializers import PublicUserSerializer
 from .models import Booking
@@ -17,7 +21,8 @@ class PublicBookingSerializer(serializers.ModelSerializer):
 
 
 class PrivateBookingSerializer(serializers.ModelSerializer):
-    user = PublicUserSerializer(read_only=True)
+    room = RoomListSerializer()
+    experience = ExperienceListSerializer()
 
     class Meta:
         model = Booking
