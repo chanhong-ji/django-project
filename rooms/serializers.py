@@ -72,6 +72,7 @@ class RoomDetailSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
     thumb_photo = serializers.SerializerMethodField(read_only=True)
+    total_reviews = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Room
@@ -92,3 +93,6 @@ class RoomDetailSerializer(serializers.ModelSerializer):
         if thumb_photos:
             return thumb_photos[0]["file"]
         return None
+
+    def get_total_reviews(self, room):
+        return room.reviews.count()
