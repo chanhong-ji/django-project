@@ -20,7 +20,7 @@ def required(key, default_value=None):
 
 variables = {
     "django": {
-        "secret_key": required("SECRET_KEY"),
+        "secret_key": required("DJANGO_SECRET_KEY"),
     },
     "cors": {
         "domain": required("CORS_DOMAIN"),

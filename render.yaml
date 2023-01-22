@@ -9,7 +9,7 @@ services:
     name: djangoproject
     env: python
     buildCommand: './build.sh'
-    startCommand: 'gunicorn djangoproject.wsgi:application'
+    startCommand: 'gunicorn config.wsgi:application'
     region: singapore
     envVars:
       - key: DATABASE_URL
