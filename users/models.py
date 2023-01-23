@@ -49,6 +49,12 @@ class User(AbstractUser):
         blank=True,
         null=True,
     )
+    social = models.CharField(
+        max_length=6,
+        choices=SocialChoices.choices,
+        blank=True,
+        null=True,
+    )
     language = models.CharField(
         max_length=2,
         choices=LanguageChoices.choices,
@@ -58,10 +64,4 @@ class User(AbstractUser):
         max_length=5,
         choices=CurrencyChoices.choices,
         default=CurrencyChoices.WON,
-    )
-    social = models.CharField(
-        max_length=6,
-        choices=SocialChoices.choices,
-        blank=True,
-        null=True,
     )
