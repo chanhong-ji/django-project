@@ -64,4 +64,5 @@ class User(AbstractUser):
         choices=SocialChoices.choices,
         blank=True,
         null=True,
+        default=None,
     )
