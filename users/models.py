@@ -60,7 +60,7 @@ class User(AbstractUser):
         default=CurrencyChoices.WON,
     )
     social = models.CharField(
-        max_length=6,
+        max_length=10,
         choices=SocialChoices.choices,
         blank=True,
         null=True,
