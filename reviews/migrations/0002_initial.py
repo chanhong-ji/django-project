@@ -10,13 +10,13 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('rooms', '0001_initial'),
-        ('medias', '0001_initial'),
+        ('reviews', '0001_initial'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='photo',
+            model_name='review',
             name='room',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='photos', to='rooms.room'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='reviews', to='rooms.room'),
         ),
     ]
