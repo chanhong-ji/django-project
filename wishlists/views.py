@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.permissions import IsAuthenticated
 
-
+# wishlists/
 class Wishlists(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -42,6 +42,7 @@ class WishlistCommon(APIView):
             raise NotFound("Wishlist not found")
 
 
+# wishlists/:int
 class WishlistDetail(WishlistCommon):
     def get(self, request, pk):
         wishlist = self.get_object(pk, request.user)

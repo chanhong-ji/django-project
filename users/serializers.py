@@ -13,6 +13,8 @@ class PublicUserSerializer(serializers.ModelSerializer):
 
 
 class PrivateUserSerializer(serializers.ModelSerializer):
+    social = serializers.CharField(read_only=True)
+
     class Meta:
         model = User
         fields = (
@@ -44,7 +46,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
             "name",
             "avatar",
             "gender",
-            "social",
             "language",
             "currency",
             "first_name",

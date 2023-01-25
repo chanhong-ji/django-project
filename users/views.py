@@ -6,7 +6,7 @@ from rest_framework.exceptions import (
 )
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from users.models import User
 import users.serializers as UserSerializers
 from django.contrib.auth import logout, login, authenticate
@@ -58,7 +58,7 @@ class Me(APIView):
             return Response(serializer.errors)
 
 
-# users/<str:username>
+# users/@<str:username>
 # GET
 class UserDetail(APIView):
     def get_object(self, username):

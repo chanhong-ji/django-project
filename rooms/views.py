@@ -132,6 +132,7 @@ class RoomCommon:
 class Rooms(APIView, RoomCommon):
 
     permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = RoomDetailSerializer
 
     def get(self, request):
         rooms = Room.objects.all()
@@ -146,6 +147,7 @@ class Rooms(APIView, RoomCommon):
 
     def post(self, request):
         serializer = RoomDetailSerializer(data=request.data)
+
         if serializer.is_valid():
             category = self.category_validate(request)
             photos = self.photos_validate(request)
@@ -170,6 +172,7 @@ class Rooms(APIView, RoomCommon):
 class RoomDetail(APIView, RoomCommon):
 
     permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = RoomDetailSerializer
 
     def get_object(self, pk):
         try:
@@ -242,6 +245,7 @@ class RoomDetail(APIView, RoomCommon):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+# rooms/:int/reviews?page={}
 class RoomReviews(APIView):
 
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -345,7 +349,7 @@ class RoomBookings(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# rooms/:int/bookings/check
+# rooms/:int/bookings/check?check_in={}&check_out={}
 class RoomBookingCheck(APIView):
     def get_object(self, pk):
         try:
@@ -357,6 +361,9 @@ class RoomBookingCheck(APIView):
         room = self.get_object(pk=pk)
         check_in = request.query_params.get("check_in")
         check_out = request.query_params.get("check_out")
+        if not check_in or not check_out:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         exist = Booking.objects.filter(
             room=room,
             check_out__gt=check_in,
