@@ -188,12 +188,14 @@ MEDIA_ROOT = "uploads"
 MEDIA_URL = "user-uploads/"
 
 # Cors
-CORS_ALLOWED_ORIGINS = [
-    variables["cors"]["domain"],
-]
+# CORS_ALLOWED_ORIGINS = [
+#     variables["cors"]["domain"],
+# ]
 
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = [
-    variables["cors"]["domain"],
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     variables["cors"]["domain"],
+# ]
+
+CORS_ALLOW_ALL_ORIGINS = True
