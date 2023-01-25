@@ -1,7 +1,6 @@
 from bookings.models import Booking
 from bookings.serializers import (
     CreateExperienceBookingSerializer,
-    PrivateBookingSerializer,
     PublicBookingSerializer,
 )
 from categories.models import Category
@@ -10,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 import rest_framework.status as status
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from experiences.serializers import (
     ExperienceDetailSerializer,
     ExperienceListSerializer,

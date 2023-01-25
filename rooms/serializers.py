@@ -69,8 +69,8 @@ class RoomDetailSerializer(serializers.ModelSerializer):
     amenities = AmenitySerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
     photos = PhotoSerializer(many=True, read_only=True)
-    rating = serializers.SerializerMethodField()
-    is_owner = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField(read_only=True)
+    is_owner = serializers.SerializerMethodField(read_only=True)
     thumb_photo = serializers.SerializerMethodField(read_only=True)
     total_reviews = serializers.SerializerMethodField(read_only=True)
 
@@ -96,3 +96,12 @@ class RoomDetailSerializer(serializers.ModelSerializer):
 
     def get_total_reviews(self, room):
         return room.reviews.count()
+
+
+# class RoomDetailSerializerClass(RoomDetailSerializer):
+#     # 현재 존재하는 데이터를 가지고 와서 초이스로 만든다....
+
+#     category = serializers.IntegerField()
+#     amenities = serializers.MultipleChoiceField(
+#         # choices=Amenity.objects.all().values("pk")
+#     )

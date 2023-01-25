@@ -8,6 +8,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     user = PublicUserSerializer(
         read_only=True,
     )
+    rating = serializers.IntegerField(min_value=1, max_value=5)
 
     class Meta:
         model = Review
