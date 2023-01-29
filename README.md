@@ -28,7 +28,7 @@
 - [x] /categories/experience
 - [x] /categories/:pk
 
-### Perks
+### Experiences
 
 - [x] /experiences/
 - [x] /experiences/:pk
