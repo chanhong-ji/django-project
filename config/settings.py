@@ -34,6 +34,9 @@ sentry_sdk.init(
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+DEBUG = variables["deploy"]["mode"] == "False"
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -41,14 +44,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = variables["django"]["secret_key"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = "RENDER" not in os.environ
-
 
 ALLOWED_HOSTS = []
 
-RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+if not DEBUG:
+    ALLOWED_HOSTS.append(variables["deploy"]["host_url"])
+
 
 # Application definition
 
@@ -129,6 +130,7 @@ else:
     DATABASES = {
         "default": dj_database_url.config(
             conn_max_age=600,
+            ssl_require=True,
         )
     }
 

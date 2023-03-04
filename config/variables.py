@@ -38,4 +38,8 @@ variables = {
         "client_id": required("CF_ACCOUNT_ID"),
         "client_token": required("CF_TOKEN"),
     },
+    "deploy": {
+        "mode": required("HEROKU_IS", "False"),
+        "host_url": required("HOST_URL", "*"),
+    },
 }
