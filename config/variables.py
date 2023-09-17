@@ -41,6 +41,6 @@ variables = {
     "deploy": {
         "mode": required("HEROKU_IS", "False"),
         "host_url": required("HOST_URL", "*"),
-        "db_url": required("JAWSDB_MARIA_URL"),
+        "db_url": required("JAWSDB_URL"),
     },
 }
