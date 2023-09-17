@@ -1,5 +1,8 @@
 ## REST API structure
 
+### Deploy at
+https://django-test-project.herokuapp.com/rooms/
+
 ### Rooms
 
 - [x] /rooms
